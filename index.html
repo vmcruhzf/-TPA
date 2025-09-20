@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暮色故城 TPA - 我的世界服务器</title>
+    <style>
+        :root {
+            /* 浅色主题变量 */
+            --grass-green: #7CFC00;
+            --dirt-brown: #8B4513;
+            --sky-blue: #87CEEB;
+            --dark-gray: #333333;
+            --light-bg: #f5f5f5;
+            --light-text: #333333;
+            --card-bg: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* 深色主题变量 */
+            --grass-green: #2E8B57;
+            --dirt-brown: #5C3317;
+            --sky-blue: #5F9EA0;
+            --dark-gray: #CCCCCC;
+            --light-bg: #1A1A1A;
+            --light-text: #EEEEEE;
+            --card-bg: #2A2A2A;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="10" height="10" fill="%23000" opacity="0.05"/><rect x="10" y="10" width="10" height="10" fill="%23000" opacity="0.05"/></svg>');
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 导航栏样式 */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            transition: background-color 0.3s;
+        }
+
+        header.scrolled {
+            background-color: var(--card-bg);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--grass-green);
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            image-rendering: pixelated;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 30px;
+        }
+
+        .nav-links a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--grass-green);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            height: 3px;
+            width: 100%;
+            background-color: var(--light-text);
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin-left: 20px;
+            color: var(--light-text);
+        }
+
+        /* 英雄区域样式 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(to bottom, var(--sky-blue), var(--grass-green));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="10" height="10" fill="%23000" opacity="0.1"/><rect x="10" y="10" width="10" height="10" fill="%23000" opacity="0.1"/></svg>');
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 2px 2px 0 var(--dark-gray);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--dirt-brown);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .qq-group-btn {
+            background-color: #12b7f5;
+            margin-left: 10px;
+        }
+
+        /* 内容区块样式 */
+        section {
+            padding: 80px 0;
+        }
+
+        section h2 {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 2.5rem;
+            color: var(--grass-green);
+            position: relative;
+        }
+
+        section h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--dirt-brown);
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid var(--dirt-brown);
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+
+        /* 服务器状态样式 */
+        .server-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .status-online {
+            background-color: #4CAF50;
+        }
+
+        .status-offline {
+            background-color: #F44336;
+        }
+
+        .status-maintenance {
+            background-color: #FFC107;
+        }
+
+        .server-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .server-info-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* 社区板块样式 */
+        .announcements, .player-messages {
+            margin-bottom: 40px;
+        }
+
+        .announcement-item, .message-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--shadow-color);
+        }
+
+        .message-form {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--shadow-color);
+            border-radius: 5px;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+        }
+
+        .emoji-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .emoji {
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 5px;
+            background-color: var(--light-bg);
+        }
+
+        .emoji:hover {
+            background-color: var(--grass-green);
+        }
+
+        /* 服务器信息样式 */
+        .server-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .rule-item, .mod-item {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .rule-item::before, .mod-item::before {
+            content: '■';
+            position: absolute;
+            left: 0;
+            color: var(--grass-green);
+        }
+
+        /* 加入引导样式 */
+        .join-guide {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .server-address {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .address-text {
+            flex-grow: 1;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .copy-btn {
+            background-color: var(--dirt-brown);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--grass-green);
+        }
+
+        .guide-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .step-number {
+            background-color: var(--dirt-brown);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background-color: var(--dark-gray);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            color: var(--grass-green);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--grass-green);
+        }
+
+        /* QQ群链接样式 */
+        .qq-group-link {
+            display: inline-flex;
+            align-items: center;
+            background-color: #12b7f5;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .qq-group-link:hover {
+            background-color: #0e9bd4;
+            transform: scale(1.05);
+        }
+
+        .qq-group-link::before {
+            content: "🐧";
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1199px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .join-guide {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background-color: var(--card-bg);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: left 0.3s;
+            }
+            
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .nav-links li {
+                margin: 15px 0;
+            }
+            
+            .hamburger {
+                display: flex;
+            }
+            
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            section {
+                padding: 60px 0;
+            }
+            
+            .server-info {
+                flex-direction: column;
+            }
+
+            .qq-group-link {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+
+        .diamond-loader {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            transform: rotate(45deg);
+            animation: rotate-diamond 2s infinite ease-in-out;
+        }
+
+        .diamond-loader::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--grass-green);
+            animation: pulse-diamond 2s infinite ease-in-out;
+        }
+
+        @keyframes rotate-diamond {
+            0%, 100% { transform: rotate(45deg) scale(1); }
+            50% { transform: rotate(405deg) scale(1.1); }
+        }
+
+        @keyframes pulse-diamond {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 工具类 */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .pixel-border {
+            border: 4px solid var(--dirt-brown);
+            border-image: 
+                linear-gradient(45deg, 
+                    var(--dirt-brown) 25%, 
+                    transparent 25%, 
+                    transparent 50%, 
+                    var(--dirt-brown) 50%, 
+                    var(--dirt-brown) 75%, 
+                    transparent 75%, 
+                    transparent) 4;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">
+                    <span>■</span> 暮色故城 
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#info">服务器信息</a></li>
+                    <li><a href="#join">加入游戏</a></li>
+                    <li><a href="https://qun.qq.com/universal-share/share?ac=1&authKey=6iSch6cr6t9rw1R4hHT26BRmyzMMzQLZjU8wLklycz8q5pI%2BiDl7iomzwn%2BZfZNy&busi_data=eyJncm91cENvZGUiOiIxMDU1OTgwNDI5IiwidG9rZW4iOiJzRXQwaExvaTRhMndCUFVtTTRNN3ZrbzRUeEhXd21HTnlNV1JFQmI0Mm01UkFkblJvU3I5YnU0ZFd0RFIzZGZJIiwidWluIjoiMTc2MjYxOTk4NSJ9&data=Ahrbrs96uAYPl-ccRWSrNyMxQhYe82awNepDxASgziqE8lcnn24JiDZKOF7hc2-5zmgmvPh0oD8YEm_cnMXBYQ&svctype=4&tempid=h5_group_info" target="_blank" class="qq-group-link">QQ交流群</a></li>
+                </ul>
+                <div class="nav-right">
+                    <button class="theme-toggle" id="themeToggle">🌙</button>
+                    <div class="hamburger" id="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>欢迎来到暮色故城 TPA</h1>
+            <p>一个充满创意与冒险的我的世界服务器</p>
+            <div>
+                <a href="#join" class="btn">立即加入</a>
+                <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=6iSch6cr6t9rw1R4hHT26BRmyzMMzQLZjU8wLklycz8q5pI%2BiDl7iomzwn%2BZfZNy&busi_data=eyJncm91cENvZGUiOiIxMDU1OTgwNDI5IiwidG9rZW4iOiJzRXQwaExvaTRhMndCUFVtTTRNN3ZrbzRUeEhXd21HTnlNV1JFQmI0Mm01UkFkblJvU3I5YnU0ZFd0RFIzZGZJIiwidWluIjoiMTc2MjYxOTk4NSJ9&data=Ahrbrs96uAYPl-ccRWSrNyMxQhYe82awNepDxASgziqE8lcnn24JiDZKOF7hc2-5zmgmvPh0oD8YEm_cnMXBYQ&svctype=4&tempid=h5_group_info" target="_blank" class="btn qq-group-btn">加入QQ群</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="info">
+        <div class="container">
+            <h2>服务器信息</h2>
+            
+            <div class="server-details">
+                <div class="card">
+                    <h3>服务器类型</h3>
+                    <p>我们是一个以生存模式为主的服务器。</p>
+                    <ul>
+                        <li>主世界：生存模式</li>
+                    </ul>
+                    <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=6iSch6cr6t9rw1R4hHT26BRmyzMMzQLZjU8wLklycz8q5pI%2BiDl7iomzwn%2BZfZNy&busi_data=eyJncm91cENvZGUiOiIxMDU1OTgwNDI5IiwidG9rZW4iOiJzRXQwaExvaTRhMndCUFVtTTRNN3ZrbzRUeEhXd21HTnlNV1JFQmI0Mm01UkFkblJvU3I5YnU0ZFd0RFIzZGZJIiwidWluIjoiMTc2MjYxOTk4NSJ9&data=Ahrbrs96uAYPl-ccRWSrNyMxQhYe82awNepDxASgziqE8lcnn24JiDZKOF7hc2-5zmgmvPh0oD8YEm_cnMXBYQ&svctype=4&tempid=h5_group_info" target="_blank" class="qq-group-link">加入QQ交流群</a>
+                </div>
+                
+                <div class="card">
+                    <h3>核心规则</h3>
+                    <div class="rule-item">禁止使用任何形式的外挂</div>
+                    <div class="rule-item">尊重其他玩家，禁止任何形式的歧视或骚扰</div>
+                    <div class="rule-item">禁止恶意破坏他人建筑或财产</div>
+                    <div class="rule-item">禁止使用服务器漏洞获利</div>
+                    <div class="rule-item">建造红石机器时请注意服务器性能影响</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="join" style="background-color: var(--light-bg);">
+        <div class="container">
+            <h2>加入游戏</h2>
+            
+            <div class="join-guide">
+                <div class="card">
+                    <h3>服务器号</h3>
+                    <div class="server-address">
+                        <div class="address-text" id="serverAddress">28016126</div>
+                        <button class="copy-btn" onclick="copyAddress()">复制</button>
+                    </div>
+                    <p>直接将上述地址添加到服务器列表即可加入游戏！</p>
+                </div>
+                
+                <div class="card">
+                    <h3>新手教程</h3>
+                    <div class="guide-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>启动游戏</h4>
+                                <p>确保你的游戏版本是最新版本</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>打开游戏 点击开始游戏</h4>
+                                <p>点击"租赁服"</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>输入地址</h4>
+                                <p>在服务器搜索栏输入: 28016126</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>点击服务器</h4>
+                                <p>点击"进入游戏"并加入服务器！</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+        // 主题切换功能
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // 检查系统主题偏好
+        if (prefersDarkScheme.matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = '☀️';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            themeToggle.textContent = '🌙';
+        }
+        
+        // 点击切换主题
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // 检查本地存储的主题偏好
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        // 导航栏滚动效果
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // 移动端菜单切换
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                if (this.getAttribute('href') === '#') return;
+                
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    // 关闭移动端菜单
+                    hamburger.classList.remove('active');
+                    navLinks.classList.remove('active');
+                    
+                    // 平滑滚动到目标位置
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // 复制服务器地址
+        function copyAddress() {
+            const address = document.getElementById('serverAddress');
+            navigator.clipboard.writeText(address.textContent)
+                .then(() => {
+                    alert('服务器地址已复制到剪贴板！');
+                })
+                .catch(err => {
+                    console.error('复制失败:', err);
+                });
+        }
+    </script>
+</body>
+</html>
